@@ -5,6 +5,8 @@ VisualStudioVersion = 17.11.35208.52
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaJobCandidateHub", "SigmaJobCandidateHub\SigmaJobCandidateHub.csproj", "{8F627335-682D-405B-8731-BA42B2FFE20D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SigmaJobCandidateHub.Tests", "SigmaJobCandidateHub.Tests\SigmaJobCandidateHub.Tests.csproj", "{91D063E4-2CDB-44C4-B2F0-F188ACD1A155}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8F627335-682D-405B-8731-BA42B2FFE20D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F627335-682D-405B-8731-BA42B2FFE20D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F627335-682D-405B-8731-BA42B2FFE20D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91D063E4-2CDB-44C4-B2F0-F188ACD1A155}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91D063E4-2CDB-44C4-B2F0-F188ACD1A155}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91D063E4-2CDB-44C4-B2F0-F188ACD1A155}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91D063E4-2CDB-44C4-B2F0-F188ACD1A155}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -20,55 +20,67 @@ namespace SigmaJobCandidateHub.Repository.Services
 
         public async Task<Candidate> CreateUpdateCandidate(Candidate candidate)
         {
-            // Define cache keys
+            // Define cache key
             var emailCacheKey = $"{CandidateCacheKeyPrefix}{candidate.Email}";
 
             Candidate result = memoryCache.Get<Candidate>(emailCacheKey);
 
-            // If not found, query database
             if (result == null)
             {
+                // If not found, query database
                 result = await appDbContext.Candidates
                     .SingleOrDefaultAsync(e => e.Id == candidate.Id || e.Email == candidate.Email);
-            }
 
-            if (result != null)
-            {
-                // Attach entity to the DbContext in case of get result for cache
-                if (appDbContext.Entry(result).State == EntityState.Detached)
+                if (result == null)
                 {
-                    appDbContext.Attach(result);
+                    // Add new candidate
+                    var candidateEntity = await appDbContext.Candidates.AddAsync(candidate);
+                    await appDbContext.SaveChangesAsync();
+                    candidate.Id = candidateEntity.Entity.Id;
+
+                    // Update cache with the latest data
+                    memoryCache.Set(emailCacheKey, candidate, GetCacheEntryOptions());
+                    return candidate;
                 }
-
-                // Update existing candidate
-                result.FirstName = candidate.FirstName;
-                result.LastName = candidate.LastName;
-                result.PhoneNumber = candidate.PhoneNumber;
-                result.Email = candidate.Email;
-                result.PreferredCallStartTime = candidate.PreferredCallStartTime;
-                result.PreferredCallEndTime = candidate.PreferredCallEndTime;
-                result.LinkedInProfileUrl = candidate.LinkedInProfileUrl;
-                result.GitHubProfileUrl = candidate.GitHubProfileUrl;
-                result.Comment = candidate.Comment;
-
-                await appDbContext.SaveChangesAsync();
-
-                // Update cache with the latest data
-                memoryCache.Set(emailCacheKey, result); // Cache by Email
-                return result;
             }
-            else
+
+            // Attach entity to the DbContext in case of get result for cache
+            if (appDbContext.Entry(result).State == EntityState.Detached)
             {
-                // Add new candidate
-                var candidateEntity = await appDbContext.Candidates.AddAsync(candidate);
-                await appDbContext.SaveChangesAsync();
-                candidate.Id = candidateEntity.Entity.Id;
-
-                // Update cache with the new candidate
-                memoryCache.Set(emailCacheKey, candidate); // Cache by Email
-                return candidate;
+                appDbContext.Attach(result);
             }
+
+            // Update existing candidate
+            UpdateCandidateProperties(result, candidate);
+
+            await appDbContext.SaveChangesAsync();
+
+            // Update cache with the latest data
+            memoryCache.Set(emailCacheKey, result, GetCacheEntryOptions());
+
+            return result;
         }
 
+        private void UpdateCandidateProperties(Candidate target, Candidate source)
+        {
+            target.FirstName = source.FirstName;
+            target.LastName = source.LastName;
+            target.PhoneNumber = source.PhoneNumber;
+            target.Email = source.Email;
+            target.PreferredCallStartTime = source.PreferredCallStartTime;
+            target.PreferredCallEndTime = source.PreferredCallEndTime;
+            target.LinkedInProfileUrl = source.LinkedInProfileUrl;
+            target.GitHubProfileUrl = source.GitHubProfileUrl;
+            target.Comment = source.Comment;
+        }
+
+        private MemoryCacheEntryOptions GetCacheEntryOptions()
+        {
+            return new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1),
+                SlidingExpiration = TimeSpan.FromMinutes(30)
+            };
+        }
     }
 }

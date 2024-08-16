@@ -1,12 +1,17 @@
 using Microsoft.EntityFrameworkCore;
 using SigmaJobCandidateHub.Data;
 using SigmaJobCandidateHub.Extensions;
+using SigmaJobCandidateHub.Repository.Interface;
+using SigmaJobCandidateHub.Repository.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DBConnection")));
+
+// Register the repository with a scoped lifetime
+builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

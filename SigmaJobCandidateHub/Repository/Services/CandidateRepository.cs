@@ -53,10 +53,18 @@ namespace SigmaJobCandidateHub.Repository.Services
             // Update existing candidate
             UpdateCandidateProperties(result, candidate);
 
-            await appDbContext.SaveChangesAsync();
+            try
+            {
+                await appDbContext.SaveChangesAsync();
 
-            // Update cache with the latest data
-            memoryCache.Set(emailCacheKey, result, GetCacheEntryOptions());
+                // Update cache with the latest data
+                memoryCache.Set(emailCacheKey, result, GetCacheEntryOptions());
+            }
+            catch (DbUpdateException ex)
+            {
+                // Log or handle exception
+                throw new ApplicationException("An error occurred while saving the candidate.", ex);
+            }
 
             return result;
         }

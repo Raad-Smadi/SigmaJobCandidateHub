@@ -12,20 +12,42 @@ namespace SigmaJobCandidateHub.Extensions
                 return null;
             }
 
-            var timeString = reader.GetString();
-            if (string.IsNullOrEmpty(timeString))
+            if (reader.TokenType == JsonTokenType.StartObject)
             {
-                return null;
+                int hour = 0, minute = 0;
+                while (reader.Read())
+                {
+                    if (reader.TokenType == JsonTokenType.PropertyName)
+                    {
+                        string propertyName = reader.GetString();
+                        reader.Read(); // Move to the value
+                        if (propertyName == "hour")
+                        {
+                            hour = reader.GetInt32();
+                        }
+                        else if (propertyName == "minute")
+                        {
+                            minute = reader.GetInt32();
+                        }
+                    }
+                    else if (reader.TokenType == JsonTokenType.EndObject)
+                    {
+                        return new TimeOnly(hour, minute);
+                    }
+                }
             }
 
-            return TimeOnly.Parse(timeString);
+            throw new JsonException("Invalid JSON format for TimeOnly.");
         }
 
         public override void Write(Utf8JsonWriter writer, TimeOnly? value, JsonSerializerOptions options)
         {
             if (value.HasValue)
             {
-                writer.WriteStringValue(value.Value.ToString("HH:mm"));
+                writer.WriteStartObject();
+                writer.WriteNumber("hour", value.Value.Hour);
+                writer.WriteNumber("minute", value.Value.Minute);
+                writer.WriteEndObject();
             }
             else
             {
@@ -33,4 +55,5 @@ namespace SigmaJobCandidateHub.Extensions
             }
         }
     }
+
 }
